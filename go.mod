@@ -1,4 +1,4 @@
-module lab1
+module github.com/hmuriyMax/SecurityCW
 
 go 1.19
 

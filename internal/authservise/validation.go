@@ -1,4 +1,4 @@
-package main
+package authservise
 
 import (
 	"encoding/json"

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Смените пароль</title>
+    <link rel="stylesheet" href="res/styles/style.css">
+    <link rel="stylesheet" href="res/styles/form.css">
+    <style>
+        #submit{
+            color: #809caa;
+            outline: 0 solid transparent;
+            cursor: default;
+        }
+        form{
+            background-color: #F1EBFF;
+            padding: 40px;
+            border-radius: 10px;
+            width: max-content;
+            margin: 25vh auto;
+        }
+        h2{
+            margin: 0;
+        }
+    </style>
+    <script src="res/script/twopasscheck.js"></script>
+</head>
+<body>
+    <main>
+        <form action="/newpass" autocomplete="on" method="POST">
+            <div id="message" style="display: {{if .message}} block {{else}} none {{end}}">{{.message}}</div>
+            <h2>Новый пароль? Ура!</h2>
+            <label>
+                <input name="oldpass" type="password" id="oldpass"
+                       oninput="checkOld(this)"
+                       readonly onfocus="this.removeAttribute('readonly')" placeholder="Старый пароль" required>
+            </label>
+            <label>
+                <input name="pass1" type="password" id="pass1"
+                       oninput="checkFirst(this, {{if .check}}true{{else}}false{{end}}, {{.username}})"
+                       readonly onfocus="this.removeAttribute('readonly')" placeholder="Новый пароль" required>
+            </label>
+            <label>
+                <input name="pass2" type="password" id="pass2" oninput="checkSecond(this)"
+                       readonly onfocus="this.removeAttribute('readonly')" placeholder="Повторите пароль" required>
+            </label>
+            <input type="submit" id="submit" value="Создать пароль!" disabled>
+        </form>
+    </main>
+</body>
+</html>

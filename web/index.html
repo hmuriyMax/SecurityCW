@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная</title>
+    <link rel="stylesheet" href="res/styles/style.css">
+    <style>
+        #uinputter{
+            width: 80%;
+            text-transform: lowercase;
+        }
+        #message{
+            width: 30%;
+            margin: 1% auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <span>Пользователь: {{.username}}</span>
+            <span>Автор сайта: Щемилкин Максим, А-05-19. Москва 2022</span>
+            <a href="/changepass">Сменить мой пароль</a>
+            <a href="/logout">Выход</a>
+        </nav>
+    </header>
+    <main>
+        <div id="message" style="display: {{if .message}} block {{else}} none {{end}}">{{.message}}</div>
+        {{if .Table}}
+        <div id="usertable">
+            <div class="row">
+                <div class="name">Логин</div>
+                <div>Заблокирован?</div>
+                <div class="button_cell">
+                    Вкл/Выкл блокировку
+                </div>
+                <div>Ограничения на пароль?</div>
+                <div class="button_cell">
+                    Вкл/Выкл ограничения
+                </div>
+            </div>
+            {{range .Table}}
+            <div class="row">
+                <div class="name">{{.Login}}</div>
+                <div class="is_blocked">{{.IsBlocked}}</div>
+                <div class="button_cell">
+                    <form method="GET" action="./changeblock">
+                        <input type="hidden" name="user" value="{{.Login}}">
+                        <input type="submit" value="Изменить">
+                    </form>
+                </div>
+                <div class="is_good">{{.PassRestr}}</div>
+                <div class="button_cell">
+                    <form method="GET" action="./changerestr">
+                        <input type="hidden" name="user" value="{{.Login}}">
+                        <input type="submit" value="Изменить">
+                    </form>
+                </div>
+            </div>
+            {{end}}
+            <div class="row">
+                <div class="name">
+                    <form action="/adduser" method="POST" id="adder">
+                        <label>
+                            <input name="username" required id="uinputter">
+                        </label>
+                    </form>
+                </div>
+                <div class="is_blocked">FALSE</div>
+                <div class="button_cell"></div>
+                <div class="is_good">TRUE</div>
+                <div class="button_cell">
+                    <input type="submit" form="adder" value="Добавить">
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </main>
+</body>
+</html>

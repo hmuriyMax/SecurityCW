@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func checkLogHandler(writer http.ResponseWriter, request *http.Request) {
+func (s *HTTPService) checkLogHandler(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodPost {
 		http.Error(writer, "Not valid method", http.StatusMethodNotAllowed)
 	}
@@ -20,7 +20,7 @@ func checkLogHandler(writer http.ResponseWriter, request *http.Request) {
 	login := strings.ToLower(request.PostForm.Get("login"))
 	password := request.PostForm.Get("password")
 
-	gotUser, err := main.users.GetUserByLogin(login)
+	gotUser, err := s.auth.Users.GetUserByLogin(login)
 	if err != nil {
 		utils.Redirect(writer, "/auth?mess=unauth&uname="+login, http.StatusSeeOther)
 		return
@@ -42,7 +42,7 @@ func checkLogHandler(writer http.ResponseWriter, request *http.Request) {
 	if _, err := request.Cookie("token"); err == nil {
 		utils.DelCookie(writer, "token")
 	}
-	utils.SetCookie(writer, "token", main.tokens.Add(login, main.users.parsed[0].Login == login), int(utils.CookiesAge))
+	utils.SetCookie(writer, "token", s.auth.Tokens.Add(login, s.auth.Users.GetAllUsers()[0].Login == login), int(utils.CookiesAge))
 
 	if password == "" {
 		utils.Redirect(writer, "/firstsign", http.StatusTemporaryRedirect)
@@ -51,22 +51,22 @@ func checkLogHandler(writer http.ResponseWriter, request *http.Request) {
 	utils.Redirect(writer, "/", http.StatusFound)
 }
 
-func logoutHandler(writer http.ResponseWriter, request *http.Request) {
+func (s *HTTPService) logoutHandler(writer http.ResponseWriter, request *http.Request) {
 	tok, err := request.Cookie("token")
 	if err == nil {
 		utils.DelCookie(writer, "token")
 	}
-	main.tokens.Delete(tok.Value)
+	s.auth.Tokens.Delete(tok.Value)
 	utils.Redirect(writer, "/", http.StatusFound)
 }
 
-func newPassHandler(writer http.ResponseWriter, request *http.Request) {
+func (s *HTTPService) newPassHandler(writer http.ResponseWriter, request *http.Request) {
 	token, err := request.Cookie("token")
 	if err != nil {
 		http.Error(writer, "User token not found", http.StatusInternalServerError)
 		return
 	}
-	tkn, err := main.tokens.Get(token.Value)
+	tkn, err := s.auth.Tokens.Get(token.Value)
 	if err != nil {
 		return
 	}
@@ -88,7 +88,7 @@ func newPassHandler(writer http.ResponseWriter, request *http.Request) {
 		utils.Redirect(writer, request.Referer()+"?mess=unmtch", http.StatusTemporaryRedirect)
 		return
 	}
-	usr, err := main.users.GetUserByLogin(tkn.Name)
+	usr, err := s.auth.Users.GetUserByLogin(tkn.Name)
 
 	if err != nil {
 		http.Error(writer, "User not found!", http.StatusInternalServerError)
@@ -108,13 +108,13 @@ func newPassHandler(writer http.ResponseWriter, request *http.Request) {
 	utils.Redirect(writer, "/", http.StatusFound)
 }
 
-func adduserHandler(writer http.ResponseWriter, request *http.Request) {
+func (s *HTTPService) adduserHandler(writer http.ResponseWriter, request *http.Request) {
 	token, err := request.Cookie("token")
 	if err != nil {
 		http.Error(writer, "User token not found", http.StatusInternalServerError)
 		return
 	}
-	tkn, err := main.tokens.Get(token.Value)
+	tkn, err := s.auth.Tokens.Get(token.Value)
 	if err != nil {
 		return
 	}
@@ -132,7 +132,7 @@ func adduserHandler(writer http.ResponseWriter, request *http.Request) {
 	if newUser == "" {
 		utils.Redirect(writer, "/?mess=empty", http.StatusFound)
 	}
-	_, err = main.users.GetUserByLogin(newUser)
+	_, err = s.auth.Users.GetUserByLogin(newUser)
 	if err == nil {
 		utils.Redirect(writer, "/?mess=exists", http.StatusFound)
 		return
@@ -143,19 +143,19 @@ func adduserHandler(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	user := authservise.User{newUser, "", false, true, false, 0}
-	err = main.users.Append(&user)
+	err = s.auth.Users.Append(&user)
 	if err != nil {
 		return
 	}
 	utils.Redirect(writer, "/", http.StatusFound)
 }
 
-func changeRestrHandler(writer http.ResponseWriter, request *http.Request) {
+func (s *HTTPService) changeRestrHandler(writer http.ResponseWriter, request *http.Request) {
 	token, err := request.Cookie("token")
 	if err != nil {
 		http.Error(writer, "User token not found", http.StatusInternalServerError)
 	}
-	tkn, err := main.tokens.Get(token.Value)
+	tkn, err := s.auth.Tokens.Get(token.Value)
 	if err != nil {
 		http.Error(writer, "Not found in token table", http.StatusInternalServerError)
 	}
@@ -166,7 +166,7 @@ func changeRestrHandler(writer http.ResponseWriter, request *http.Request) {
 
 	username := request.URL.Query().Get("user")
 
-	login, err := main.users.GetUserByLogin(username)
+	login, err := s.auth.Users.GetUserByLogin(username)
 	if err != nil {
 		http.Error(writer, "User not found", http.StatusInternalServerError)
 	}
@@ -176,12 +176,12 @@ func changeRestrHandler(writer http.ResponseWriter, request *http.Request) {
 	utils.Redirect(writer, request.Referer(), http.StatusFound)
 }
 
-func changeBlockHandler(writer http.ResponseWriter, request *http.Request) {
+func (s *HTTPService) changeBlockHandler(writer http.ResponseWriter, request *http.Request) {
 	token, err := request.Cookie("token")
 	if err != nil {
 		http.Error(writer, "User token not found", http.StatusInternalServerError)
 	}
-	tkn, err := main.tokens.Get(token.Value)
+	tkn, err := s.auth.Tokens.Get(token.Value)
 	if err != nil {
 		http.Error(writer, "Not found in token table", http.StatusInternalServerError)
 	}
@@ -192,7 +192,7 @@ func changeBlockHandler(writer http.ResponseWriter, request *http.Request) {
 
 	username := request.URL.Query().Get("user")
 
-	login, err := main.users.GetUserByLogin(username)
+	login, err := s.auth.Users.GetUserByLogin(username)
 	if err != nil {
 		http.Error(writer, "User not found", http.StatusInternalServerError)
 	}

@@ -122,16 +122,15 @@ func (db *Database) Close() {
 		log.Fatal(err)
 	}
 
-	marshal, err := json.MarshalIndent(db.parsed, "", "  ")
+	bytes, err := json.MarshalIndent(db.parsed, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Security part
-	bytes, err := Encrypt(marshal, md5.Sum([]byte(db.masterPassword)))
+	bytes, err = Encrypt(bytes, md5.Sum([]byte(db.masterPassword)))
 	if err != nil {
 		log.Printf("Failed to encrypt: %s. Saving unencrypted version for backup", err)
-		bytes = marshal
 	}
 
 	_, err = fmt.Fprint(file, string(bytes))

@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func (s *HTTPService) indexHandler(w http.ResponseWriter, r *http.Request) {
 	indexPath := utils.HTMLpath + "index.html"
 	var pageTemplate = template.Must(template.ParseFiles(indexPath))
 
@@ -15,7 +15,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		utils.Redirect(w, "/auth", http.StatusTemporaryRedirect)
 		return
 	}
-	user, err := main.tokens.Get(cookie.Value)
+	user, err := s.auth.Tokens.Get(cookie.Value)
 	if err != nil {
 		utils.Redirect(w, "/auth", http.StatusTemporaryRedirect)
 		return
@@ -23,7 +23,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := make(map[string]interface{})
 	if user.Su {
-		data["Table"] = main.users.parsed
+		data["Table"] = s.auth.Users.GetAllUsers()
 	}
 	data["username"] = user.Name
 
@@ -37,7 +37,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	defer func() { _ = pageTemplate.Execute(w, data) }()
 }
 
-func authHandler(writer http.ResponseWriter, request *http.Request) {
+func (s *HTTPService) authHandler(writer http.ResponseWriter, request *http.Request) {
 	authPath := utils.HTMLpath + "auth.html"
 	var pageTemplate = template.Must(template.ParseFiles(authPath))
 	data := make(map[string]string)
@@ -54,7 +54,7 @@ func authHandler(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func firstSignHandler(writer http.ResponseWriter, request *http.Request) {
+func (s *HTTPService) firstSignHandler(writer http.ResponseWriter, request *http.Request) {
 	authPath := utils.HTMLpath + "firstauth.html"
 	var pageTemplate = template.Must(template.ParseFiles(authPath))
 	data := make(map[string]string)
@@ -69,14 +69,14 @@ func firstSignHandler(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, "User token not found", http.StatusInternalServerError)
 		return
 	}
-	usr, err := main.tokens.Get(token.Value)
+	usr, err := s.auth.Tokens.Get(token.Value)
 	if err != nil {
 		http.Error(writer, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	data["username"] = usr.Name
-	login, err := main.users.GetUserByLogin(usr.Name)
+	login, err := s.auth.Users.GetUserByLogin(usr.Name)
 	if err != nil {
 		http.Error(writer, "User not found", http.StatusInternalServerError)
 		return
@@ -91,7 +91,7 @@ func firstSignHandler(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func changePassHandler(writer http.ResponseWriter, request *http.Request) {
+func (s *HTTPService) changePassHandler(writer http.ResponseWriter, request *http.Request) {
 	authPath := utils.HTMLpath + "changepass.html"
 	var pageTemplate = template.Must(template.ParseFiles(authPath))
 	data := make(map[string]string)
@@ -109,14 +109,14 @@ func changePassHandler(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, "User token not found", http.StatusInternalServerError)
 		return
 	}
-	usr, err := main.tokens.Get(token.Value)
+	usr, err := s.auth.Tokens.Get(token.Value)
 	if err != nil {
 		http.Error(writer, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	data["username"] = usr.Name
-	login, err := main.users.GetUserByLogin(usr.Name)
+	login, err := s.auth.Users.GetUserByLogin(usr.Name)
 	if err != nil {
 		http.Error(writer, "User not found", http.StatusInternalServerError)
 		return

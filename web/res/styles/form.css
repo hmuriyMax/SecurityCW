@@ -61,3 +61,9 @@ label > input:focus-visible {
 #submit:hover{
     outline-color: #003a59;
 }
+
+#symbols{
+    font-size: 4em;
+    font-family: 'Roboto', Consolas, monospace;
+    font-weight: bold;
+}

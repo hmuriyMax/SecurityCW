@@ -1,10 +1,16 @@
 package httpservice
 
 import (
+	"fmt"
 	"github.com/hmuriyMax/SecurityCW/internal/utils"
 	"html/template"
+	"math/rand"
 	"net/http"
 )
+
+func randSymbol() byte {
+	return 'A' + byte(rand.Intn(3))
+}
 
 func (s *HTTPService) indexHandler(w http.ResponseWriter, r *http.Request) {
 	indexPath := utils.HTMLpath + "index.html"
@@ -48,6 +54,7 @@ func (s *HTTPService) authHandler(writer http.ResponseWriter, request *http.Requ
 		data["message"] = "Вы заблокированы. Уходите."
 	}
 	data["username"] = request.URL.Query().Get("uname")
+	data["letter"] = string(randSymbol())
 	err := pageTemplate.Execute(writer, data)
 	if err != nil {
 		http.Error(writer, "Error while opening page", http.StatusInternalServerError)
@@ -76,6 +83,13 @@ func (s *HTTPService) firstSignHandler(writer http.ResponseWriter, request *http
 	}
 
 	data["username"] = usr.Name
+
+	var symbols []byte
+	for i := 0; i < symLength; i++ {
+		symbols = append(symbols, randSymbol())
+	}
+	data["symbols"] = fmt.Sprintf("%s", symbols)
+
 	login, err := s.auth.Users.GetUserByLogin(usr.Name)
 	if err != nil {
 		http.Error(writer, "User not found", http.StatusInternalServerError)
@@ -104,6 +118,13 @@ func (s *HTTPService) changePassHandler(writer http.ResponseWriter, request *htt
 	if request.URL.Query().Get("mess") == "opass" {
 		data["message"] = "Старый пароль неверен"
 	}
+
+	var symbols []byte
+	for i := 0; i < symLength; i++ {
+		symbols = append(symbols, randSymbol())
+	}
+	data["symbols"] = fmt.Sprintf("%s", symbols)
+
 	token, err := request.Cookie("token")
 	if err != nil {
 		http.Error(writer, "User token not found", http.StatusInternalServerError)

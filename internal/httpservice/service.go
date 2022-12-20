@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const symLength = 5
+
 type HTTPService struct {
 	port       int
 	host       string

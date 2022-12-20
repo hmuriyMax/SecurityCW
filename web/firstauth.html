@@ -35,11 +35,6 @@
             font-size: 1.3em;
             font-weight: 500;
         }
-        #submit{
-            color: #809caa;
-            outline: 0 solid transparent;
-            cursor: default;
-        }
         #left-block > img{
             width: 200px;
             height: 200px;
@@ -53,8 +48,6 @@
             transition-timing-function: ease-in-out;
         }
     </style>
-    <script src="res/script/twopasscheck.js"></script>
-    <script>c = true</script>
 </head>
 <body>
 <div id="left-block">
@@ -63,18 +56,23 @@
 </div>
 <div id="right-block">
     <form action="/newpass" autocomplete="on" method="POST">
-        <p>Пора создать вам пароль!</p>
         <div id="message" style="display: {{if .message}} block {{else}} none {{end}}">{{.message}}</div>
-        <label>
-            <input name="pass1" type="password" id="pass1"
-                   oninput="checkFirst(this, {{if .check}}true{{else}}false{{end}}, {{.username}})"
-                   readonly onfocus="this.removeAttribute('readonly')" placeholder="Введите пароль" required>
-        </label>
-        <label>
-            <input name="pass2" type="password" id="pass2" oninput="checkSecond(this)"
-                   readonly onfocus="this.removeAttribute('readonly')" placeholder="Повторите пароль" required>
-        </label>
-        <input type="submit" id="submit" value="Создать пароль!" disabled>
+<!--        <label>-->
+<!--            <input name="pass1" type="password" id="pass1"-->
+<!--                   oninput="checkFirst(this, {{if .check}}true{{else}}false{{end}}, {{.username}})"-->
+<!--                   readonly onfocus="this.removeAttribute('readonly')" placeholder="Введите пароль" required>-->
+<!--        </label>-->
+<!--        <label>-->
+<!--            <input name="pass2" type="password" id="pass2" oninput="checkSecond(this)"-->
+<!--                   readonly onfocus="this.removeAttribute('readonly')" placeholder="Повторите пароль" required>-->
+<!--        </label>-->
+        <div class="symbols-block">
+            <h2>Запомните эти символы!</h2>
+            <p>При следующем входе потребуется их ввести вновь</p>
+            <p id="symbols">{{.symbols}}</p>
+        </div>
+        <input type="hidden" name="pass" value="{{.symbols}}">
+        <input type="submit" id="submit" value="Запомнил_а!">
     </form>
 </div>
 </body>

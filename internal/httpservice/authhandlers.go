@@ -5,6 +5,7 @@ import (
 	"github.com/hmuriyMax/SecurityCW/internal/utils"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -14,11 +15,12 @@ func (s *HTTPService) checkLogHandler(writer http.ResponseWriter, request *http.
 	}
 	err := request.ParseForm()
 	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		log.Println(err)
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
 	login := strings.ToLower(request.PostForm.Get("login"))
-	password := request.PostForm.Get("password")
+	letter := request.PostForm.Get("letter")
+	number := request.PostForm.Get("number")
 
 	gotUser, err := s.auth.Users.GetUserByLogin(login)
 	if err != nil {
@@ -32,8 +34,13 @@ func (s *HTTPService) checkLogHandler(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	// Проверка на равенство сохраненного хеша и хеша полученного пароля
-	if gotUser.Pass != utils.Hash27(password) {
+	// Проверка на равенство количества букв letter и переданного числа
+	num, err := strconv.Atoi(number)
+	if err != nil {
+		utils.Redirect(writer, "/auth?mess=unauth&uname="+login, http.StatusSeeOther)
+		return
+	}
+	if strings.Count(gotUser.Pass, letter) != num {
 		utils.Redirect(writer, "/auth?mess=unauth&uname="+login, http.StatusSeeOther)
 		return
 	}
@@ -44,7 +51,7 @@ func (s *HTTPService) checkLogHandler(writer http.ResponseWriter, request *http.
 	}
 	utils.SetCookie(writer, "token", s.auth.Tokens.Add(login, s.auth.Users.GetAllUsers()[0].Login == login), int(utils.CookiesAge))
 
-	if password == "" {
+	if gotUser.Pass == "" {
 		utils.Redirect(writer, "/firstsign", http.StatusTemporaryRedirect)
 		return
 	}
@@ -80,31 +87,20 @@ func (s *HTTPService) newPassHandler(writer http.ResponseWriter, request *http.R
 		log.Println(err)
 	}
 
-	opass := request.PostForm.Get("oldpass")
-	pass1 := request.PostForm.Get("pass1")
-	pass2 := request.PostForm.Get("pass2")
+	pass := request.PostForm.Get("pass")
 
-	if pass1 != pass2 {
-		utils.Redirect(writer, request.Referer()+"?mess=unmtch", http.StatusTemporaryRedirect)
-		return
-	}
 	usr, err := s.auth.Users.GetUserByLogin(tkn.Name)
-
 	if err != nil {
 		http.Error(writer, "User not found!", http.StatusInternalServerError)
 		return
 	}
 
-	if usr.PassRestr && pass1 == utils.Reverse(usr.Login) || len(pass1) < 4 || len(pass1) > 20 {
+	if usr.PassRestr && pass == utils.Reverse(usr.Login) || len(pass) < 4 || len(pass) > 20 {
 		utils.Redirect(writer, request.Referer()+"?mess=incorr", http.StatusTemporaryRedirect)
 		return
 	}
-	if utils.Hash27(opass) != usr.Pass {
-		utils.Redirect(writer, request.Referer()+"?mess=opass", http.StatusTemporaryRedirect)
-		return
-	}
 	// Сохранение хеша пароля
-	usr.Pass = utils.Hash27(pass1)
+	usr.Pass = pass
 	utils.Redirect(writer, "/", http.StatusFound)
 }
 

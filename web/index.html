@@ -14,12 +14,18 @@
             margin: 1% auto;
         }
     </style>
+    <script type="text/javascript">
+        function clone_node(){
+            let block = document.querySelector(".name")
+            block.parentElement.appendChild(block.cloneNode(true))
+        }
+    </script>
 </head>
 <body>
     <header>
         <nav>
             <span>Пользователь: {{.username}}</span>
-            <span>Автор сайта: Щемилкин Максим, А-05-19. Москва 2022</span>
+            <span onclick="clone_node()" class="name">Автор сайта: Щемилкин Максим, А-05-19. Москва 2022</span>
             <a href="/changepass">Сменить мой пароль</a>
             <a href="/logout">Выход</a>
         </nav>

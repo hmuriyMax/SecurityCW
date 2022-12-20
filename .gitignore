@@ -1,3 +1,5 @@
 /.idea
 /tokens
 /database
+
+.DS_Store

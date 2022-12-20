@@ -24,9 +24,11 @@
           <input name="login" value="{{.username}}" style="text-transform: lowercase"
                  readonly onfocus="this.removeAttribute('readonly')" placeholder="логин" required>
       </label>
+      <div class="question">Сколько было букв {{.letter}}?</div>
+      <input type="hidden" name="letter" value="{{.letter}}">
       <label>
-          <input name="password" type="password"
-                 readonly onfocus="this.removeAttribute('readonly')" placeholder="пароль">
+          <input name="number" type="number"
+                 readonly onfocus="this.removeAttribute('readonly')" value="0">
       </label>
     <input type="submit" id="submit" value="Войти">
   </form>

@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-const symLength = 5
-
 type HTTPService struct {
 	port       int
 	host       string
@@ -101,5 +99,6 @@ func (s *HTTPService) addHandlers() {
 	s.mux.HandleFunc("/checklogin", s.checkLogHandler)
 	s.mux.HandleFunc("/changeblock", s.changeBlockHandler)
 	s.mux.HandleFunc("/changerestr", s.changeRestrHandler)
+	s.mux.HandleFunc("/changesettings", s.changeSettingsHandler)
 	s.mux.HandleFunc("/logout", s.logoutHandler)
 }

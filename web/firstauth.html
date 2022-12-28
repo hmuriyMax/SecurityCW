@@ -68,12 +68,16 @@
 <!--        </label>-->
         <div class="symbols-block">
             <h2>Запомните эти символы!</h2>
-            <p>При следующем входе потребуется их ввести вновь</p>
+            <p>При следующем входе потребуется ответить на вопрос о них</p>
             <p id="symbols">{{.symbols}}</p>
         </div>
         <input type="hidden" name="pass" value="{{.symbols}}">
-        <input type="submit" id="submit" value="Запомнил_а!">
+        <div class="button-group">
+            <input type="submit" class="submit" value="Запомнил_а!">
+            <input type="submit" class="submit" form="upd" value="Другая строка">
+        </div>
     </form>
+    <form method="get" action="/firstsign" id="upd"></form>
 </div>
 </body>
 </html>

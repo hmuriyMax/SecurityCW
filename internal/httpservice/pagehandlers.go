@@ -30,6 +30,10 @@ func (s *HTTPService) indexHandler(w http.ResponseWriter, r *http.Request) {
 	data := make(map[string]interface{})
 	if user.Su {
 		data["Table"] = s.auth.Users.GetAllUsers()
+		settingsMap := make(map[string]interface{})
+		settingsMap["Ofs"] = s.auth.Offset
+		settingsMap["Len"] = s.auth.SymLength
+		data["Settings"] = settingsMap
 	}
 	data["username"] = user.Name
 
@@ -85,7 +89,7 @@ func (s *HTTPService) firstSignHandler(writer http.ResponseWriter, request *http
 	data["username"] = usr.Name
 
 	var symbols []byte
-	for i := 0; i < symLength; i++ {
+	for i := 0; i < s.auth.SymLength; i++ {
 		symbols = append(symbols, randSymbol())
 	}
 	data["symbols"] = fmt.Sprintf("%s", symbols)
@@ -120,7 +124,7 @@ func (s *HTTPService) changePassHandler(writer http.ResponseWriter, request *htt
 	}
 
 	var symbols []byte
-	for i := 0; i < symLength; i++ {
+	for i := 0; i < s.auth.SymLength; i++ {
 		symbols = append(symbols, randSymbol())
 	}
 	data["symbols"] = fmt.Sprintf("%s", symbols)

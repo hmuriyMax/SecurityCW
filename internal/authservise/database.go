@@ -3,7 +3,6 @@ package authservise
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/md5"
 	"crypto/rand"
 	"encoding/json"
 	"errors"
@@ -31,16 +30,16 @@ type Database struct {
 
 func (db *Database) Create() error {
 	_, err := os.Create(db.filepath)
-	if db.masterPassword == "" {
-		_, _ = fmt.Print("Come up with master password: ")
-		_, _ = fmt.Scanln(&db.masterPassword)
-		db.logged = true
-	}
+	//if db.masterPassword == "" {
+	//	_, _ = fmt.Print("Come up with master password: ")
+	//	_, _ = fmt.Scanln(&db.masterPassword)
+	//	db.logged = true
+	//}
 	if err != nil {
 		log.Printf("Error while creating db at %s...\n", db.filepath)
 		return err
 	}
-	db.parsed = append(db.parsed, &User{Login: "admin", IsSuperuser: true, PassRestr: true})
+	db.parsed = append(db.parsed, &User{Login: "admin", IsSuperuser: true, PassRestr: false})
 	return nil
 }
 
@@ -71,15 +70,23 @@ func (db *Database) Parse() error {
 	}
 	bytes, err := os.ReadFile(db.filepath)
 
-	// Security part
-	fmt.Printf("Enter master password: ")
-	_, _ = fmt.Scanln(&db.masterPassword)
-	bytes, err = Decrypt(bytes, md5.Sum([]byte(db.masterPassword)))
-	if err != nil {
-		return err
+	if len(bytes) == 0 {
+		err = db.Create()
+		if err != nil {
+			return err
+		}
+		return nil
 	}
+	// Security part
+	//fmt.Printf("Enter master password: ")
+	//_, _ = fmt.Scanln(&db.masterPassword)
+	//bytes, err = Decrypt(bytes, md5.Sum([]byte(db.masterPassword)))
+	//if err != nil {
+	//	return err
+	//}
+	//err = json.Unmarshal(bytes[:len(bytes)-16], &db.parsed)
 
-	err = json.Unmarshal(bytes[:len(bytes)-16], &db.parsed)
+	err = json.Unmarshal(bytes, &db.parsed)
 	if err != nil {
 		return errors.New("wrong password entered or failed to parse database: " + err.Error())
 	}
@@ -128,10 +135,10 @@ func (db *Database) Close() {
 	}
 
 	// Security part
-	bytes, err = Encrypt(bytes, md5.Sum([]byte(db.masterPassword)))
-	if err != nil {
-		log.Printf("Failed to encrypt: %s. Saving unencrypted version for backup", err)
-	}
+	//bytes, err = Encrypt(bytes, md5.Sum([]byte(db.masterPassword)))
+	//if err != nil {
+	//	log.Printf("Failed to encrypt: %s. Saving unencrypted version for backup", err)
+	//}
 
 	_, err = fmt.Fprint(file, string(bytes))
 	if err != nil {

@@ -25,7 +25,7 @@
             <div id="message" style="display: {{if .message}} block {{else}} none {{end}}">{{.message}}</div>
             <div class="symbols-block">
                 <h2>Запомните новые символы!</h2>
-                <p>При следующем входе потребуется их ввести вновь</p>
+                <p>При следующем входе потребуется ответить на вопрос о них</p>
                 <p id="symbols">{{.symbols}}</p>
             </div>
             <input type="hidden" name="pass" value="{{.symbols}}">

@@ -43,8 +43,13 @@ label > input:focus-visible {
     border-color: #003a59;
 }
 
-#submit{
-    color: #42535c;
+.button-group{
+    display: flex;
+    justify-content: center;
+}
+
+.button-group > .submit{
+    color: #003a59;
     background-color: white;
     display: block;
     margin: 20px auto 0 auto;
@@ -58,7 +63,7 @@ label > input:focus-visible {
     padding: 10px 20px;
     font-weight: bold;
 }
-#submit:hover{
+.submit:hover{
     outline-color: #003a59;
 }
 
